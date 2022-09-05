@@ -40,7 +40,10 @@ namespace SearchDeleteJokerAndSign
                     PdfReader reader = new PdfReader(inputPdfStream);
 
                     //Creates a stamper to put an image on the original pdf
-                    PdfStamper stamper = new PdfStamper(reader, outputPdfStream); 
+                    PdfStamper stamper = new PdfStamper(reader, outputPdfStream);
+
+
+
                     for (var i = 1; i <= reader.NumberOfPages; i++)
                     {
                         var parser = new PdfReaderContentParser(reader);
@@ -59,22 +62,48 @@ namespace SearchDeleteJokerAndSign
                             cleanUpLocations.Add(new iTextSharp.xtra.iTextSharp.text.pdf.pdfcleanup.PdfCleanUpLocation(i, new iTextSharp.text.Rectangle(position.X, position.Y - 8, position.X + 85, position.Y - 8 + 20), iTextSharp.text.BaseColor.WHITE));
                             iTextSharp.xtra.iTextSharp.text.pdf.pdfcleanup.PdfCleanUpProcessor cleaner = new iTextSharp.xtra.iTextSharp.text.pdf.pdfcleanup.PdfCleanUpProcessor(cleanUpLocations, stamper);
                             cleaner.CleanUp();
-                            
+                            //Add annotation
+                            iTextSharp.text.Rectangle rect = new iTextSharp.text.Rectangle(position.X, position.Y - 8, position.X + 85, position.Y - 8 + 20);
+                            //rect.Border = 2;
+                            //rect.BorderWidth = 0.5f;
+                            //rect.BorderColor = BaseColor.BLACK;
+
+
+                          
+                            float[] quad = { rect.Left, rect.Bottom, rect.Right, rect.Bottom, rect.Left, rect.Top, rect.Right, rect.Top};
+                            rect.BorderWidth = 0.5f;
+                            rect.BorderColor = BaseColor.BLACK;
+                            // PdfAnnotation highlight = PdfAnnotation.CreateMarkup(stamper.Writer, rect, "Cadre de Signature", PdfAnnotation.MARKUP_HIGHLIGHT, quad);
+                            PdfAnnotation highlight = PdfAnnotation.CreateMarkup(stamper.Writer, rect, "Cadre de Signature", 0, quad);
+                            PdfAppearance appearance = PdfAppearance.CreateAppearance(stamper.Writer, rect.Width, rect.Height);
+                             highlight.Color = BaseColor.GRAY;
+
+                            ////appearance.SetGState(state);
+                            ////appearance.Rectangle(0, 0, rect.Width, rect.Height);
+                            ////appearance.SetColorFill(BaseColor.WHITE);
+
+                            ////appearance.Fill();
+                            //appearance.SetColorStroke(BaseColor.BLACK);
+                            //highlight.SetAppearance(PdfAnnotation.AA_FOCUS, appearance);
+                            highlight.SetAppearance(PdfAnnotation.AA_JS_FORMAT, appearance);
+
+                            stamper.AddAnnotation(highlight, i);
                             //Add Signature frame
+                            //jokerPagePosition.Position = position;
+                            //jokerPagePosition.Page = i;
+                            //Bitmap transparentBitmap = new Bitmap(85, 20);
+                            //iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(transparentBitmap, BaseColor.WHITE);
+                            //image.BorderColor = BaseColor.BLACK;
+                            //image.BorderWidth = 0.2f;
+                            //image.Border = iTextSharp.text.Image.LEFT_BORDER | iTextSharp.text.Image.TOP_BORDER | iTextSharp.text.Image.RIGHT_BORDER | iTextSharp.text.Image.BOTTOM_BORDER;
+                            //image.SetAbsolutePosition(position.X, (position.Y - 8));
+                            //stamper.GetOverContent(i).AddImage(image, true); // i stands for the page no.
                             jokerPagePosition.Position = position;
                             jokerPagePosition.Page = i;
-                            Bitmap transparentBitmap = new Bitmap(85, 20);
-                            iTextSharp.text.Image image = iTextSharp.text.Image.GetInstance(transparentBitmap,BaseColor.WHITE);
-                            image.BorderColor = BaseColor.BLACK;
-                            image.BorderWidth = 0.2f;
-                            image.Border = iTextSharp.text.Image.LEFT_BORDER | iTextSharp.text.Image.TOP_BORDER | iTextSharp.text.Image.RIGHT_BORDER | iTextSharp.text.Image.BOTTOM_BORDER;
-                            image.SetAbsolutePosition(position.X, (position.Y - 8));                                                                                 
-                            stamper.GetOverContent(i).AddImage(image, true); // i stands for the page no.
-                     
-                        }                      
+                        }
                     }
                     stamper.Close();
-                    
+
                     //get the joker page and position 
                     return jokerPagePosition;
                 }

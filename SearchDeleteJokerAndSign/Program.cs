@@ -40,14 +40,22 @@ static void signPdfFile(string sourceDocument, string destinationPath, Stream pr
     var pk = pk12.GetKey(alias).Key;
 
     // reader and stamper    
+   
+
     PdfReader reader = new PdfReader(sourceDocument);
+
+    PdfDictionary pageDict = reader.GetPageN(jokerPagePosition.Page);
+    PdfArray annotArray = pageDict.GetAsArray(PdfName.ANNOTS);
+    annotArray.Remove(0);
     using (FileStream fout = new FileStream(destinationPath, FileMode.Create, FileAccess.ReadWrite))
 
     {
+
         using (PdfStamper stamper = PdfStamper.CreateSignature(reader, fout, '\0', null, true)) //true for append signature mode
         {
-
+            
             PdfSignatureAppearance appearance = stamper.SignatureAppearance;
+            
             if (visibleSignature)
             {
                 TextLocation position = jokerPagePosition.Position;
